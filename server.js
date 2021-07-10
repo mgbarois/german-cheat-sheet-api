@@ -16,6 +16,11 @@ const db = knex({
   },
 });
 
+
+app.get("/", (req, res) => {
+    res.json("Connected to german-cheat-sheet-api")
+})
+
 // VOCAB
 app.get("/gcs/vocab", (req, res) => {
     db.select("*")
