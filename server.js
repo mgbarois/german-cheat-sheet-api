@@ -119,4 +119,6 @@ app.delete("/gcs/deleteTask", (req, res) => {
 // RESOURCES
 
 
-app.listen(3001);
+app.listen(process.env.PORT || 3001, () => {
+    console.log(`App is runnin on port ${process.env.PORT}`);
+});
