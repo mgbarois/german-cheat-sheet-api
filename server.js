@@ -2,6 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const knex = require("knex");
 
+const vocabHandler = require("./controllers/vocabHandler");
+const lookupHandler = require("./controllers/lookupHandler");
+const taskHandler = require("./controllers/taskHandler");
+const resourceHandler = require("./controllers/resourceHandler");
+const submitForm = require("./controllers/portfolioHandler");
+
+
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -22,102 +30,54 @@ app.get("/", (req, res) => {
 })
 
 // VOCAB
-app.get("/gcs/vocab", (req, res) => {
-    db.select("*")
-    .from("vocab")
-    .then(data => {
-        res.json(data);
-    })
-    .catch(err => res.status(400).json("Error"));
-})
+//CREATE TABLE vocab (id serial NOT NULL PRIMARY KEY, de_word VARCHAR (100) NOT NULL, en_word VARCHAR (100) NOT NULL, pos 
+app.get("/vocab", (req, res) => { vocabHandler.getItems(req, res, db) });
 
-app.post("/gcs/addVocab", (req, res) => {
-    const { de_word, en_word, pos } = req.body;
-    db("vocab")
-    .insert({ de_word, en_word, pos })
-    .then(res.json("Sucessfully added."))
-    .catch(err => res.status(400).json("Error")); 
-})
+app.post("/addVocab", (req, res) => { vocabHandler.addItem(req, res, db) });
 
-app.put("/gcs/editVocab", (req, res) => {
-    const { de_word, en_word, pos, id } = req.body;
-    db("vocab")
-    .where("id", id)
-    .update({ de_word, en_word, pos })
-    .then(res.json("Sucessfully edited."))
-    .catch(err => res.status(400).json("Error"));    
-})
+app.put("/editVocab", (req, res) => { vocabHandler.editItem(req, res, db) });
 
-app.delete("/gcs/deleteVocab", (req, res) => {
-    const { id } = req.body;
-    db("vocab")
-    .where("id", id)
-    .del()
-    .then(res.json("Sucessfully deleted."))
-    .catch(err => res.status(400).json("Error"));
-})
+app.delete("/deleteVocab", (req, res) => { vocabHandler.deleteItem(req, res, db) });
 
 // DICTIONARY LOOKUPS
-// CREATE TABLE dictLookups (count smallInt);
-app.get("/gcs/dictLookups", (req, res) => {
-    db.select("*")
-    .from("dictLookups")
-    .then(data => {
-        res.json(data);
-    })
-    .catch(err => res.status(400).json("Error"));
-})
+// CREATE TABLE lookups (word text, id serial NOT NULL PRIMARY KEY);
+
+app.get("/lookup", (req, res) => { lookupHandler.getItems(req, res, db) });
+
+app.post("/addLookup", (req, res) => { lookupHandler.addItem(req, res, db) });
+
 
 // PREPOSITIONS
 // CREATE TABLE prepositions (de text, en text, example text);
-app.get("/gcs/prepositions", (req, res) => {
-    db.select("*")
-    .from("prepositions")
-    .then(data => {
-        res.json(data[0].count);
-    })
-    .catch(err => res.status(400).json("Error"));
-})
+// app.get("/prep", (req, res) => { prepHandler.getItems(req, res, db) });
+
+// app.post("/addPrep", (req, res) => { prepHandler.addItem(req, res, db) });
+
+// app.put("/editPrep", (req, res) => { prepHandler.editItem(req, res, db) });
+
+// app.delete("/deletePrep", (req, res) => { prepHandler.deleteItem(req, res, db) });
 
 // TASKS
-// CREATE TABLE tasks (id PRIMARY KEY, category text, task text, done bool);
-app.get("/gcs/tasks", (req, res) => {
-    db.select("*")
-    .from("prepositions")
-    .then(data => {
-        res.json(data[0].count);
-    })
-    .catch(err => res.status(400).json("Error"));
-})
+// CREATE TABLE tasks (category text, task text, checked boolean, id serial NOT NULL PRIMARY KEY);
 
-app.post("/gcs/addTask", (req, res) => {
-    const { category, task, done } = req.body;
-    db("tasks")
-    .insert({ category, task, done })
-    .then(res.json("Sucessfully added."))
-    .catch(err => res.status(400).json("Error")); 
-})
+app.get("/task/:category?", (req, res) => { taskHandler.getItems(req, res, db) });
 
-app.put("/gcs/editTask", (req, res) => {
-    const { id, task, status } = req.body;
-    db("tasks")
-    .where("id", id)
-    .update({ task, status })
-    .then(res.json("Sucessfully edited."))
-    .catch(err => res.status(400).json("Error"));    
-})
+app.post("/addTask", (req, res) => { taskHandler.addItem(req, res, db) });
 
-app.delete("/gcs/deleteTask", (req, res) => {
-    const { id } = req.body;
-    db("tasks")
-    .where("id", id)
-    .del()
-    .then(res.json("Sucessfully deleted."))
-    .catch(err => res.status(400).json("Error"));
-})
+app.put("/editTask", (req, res) => { taskHandler.editItem(req, res, db) });
+
+app.delete("/deleteTask", (req, res) => { taskHandler.deleteItem(req, res, db) });
 
 // RESOURCES
+//create table resources (name text, link text, id serial NOT NULL PRIMARY KEY);
 
+app.get("/resource", (req, res) => { resourceHandler.getItems(req, res, db) });
+
+app.post("/addResource", (req, res) => { resourceHandler.addItem(req, res, db) });
+
+app.put("/editResource", (req, res) => { resourceHandler.editItem(req, res, db) });
+
+app.delete("/deleteResource", (req, res) => { resourceHandler.deleteItem(req, res, db) });
 
 app.listen(process.env.PORT || 3001, () => {
     console.log(`App is runnin on port ${process.env.PORT}`);
